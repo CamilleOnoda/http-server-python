@@ -9,5 +9,9 @@ def main():
     server_socket.bind(("localhost", 4221))
     server_socket.listen()
 
+    while True:
+        conn, address = server_socket.accept()
+        conn.close()
+
 if __name__ == "__main__":
     main()
