@@ -1,4 +1,4 @@
-import socket  # noqa: F401
+import socket
 
 
 def main():
@@ -8,7 +8,6 @@ def main():
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     server_socket.bind(("localhost", 4221))
     server_socket.listen()
-
 
 if __name__ == "__main__":
     main()
