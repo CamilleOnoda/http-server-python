@@ -2,7 +2,6 @@ import socket  # noqa: F401
 
 
 def main():
-    # print statements for debugging, visible when running tests.
     print("Logs from my program will appear here!")
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
