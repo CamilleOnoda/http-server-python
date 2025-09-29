@@ -1,4 +1,17 @@
+from codecs import decode
 import socket
+
+
+
+
+def extract_url_path(request_target):
+    decoded_request = request_target.decode('utf-8', errors='replace')
+    request_line = decoded_request.split('\r\n')[0]
+    parts = request_line.split(" ")
+    if len(parts) != 3:
+        raise ValueError("Malformed request line. Example: 'GET /index.html HTTP/1.1\r\n'")
+    target = parts[1]
+    return target
 
 
 def main():
@@ -12,8 +25,13 @@ def main():
     while True:
         conn, address = server_socket.accept()
         try:
-            data = conn.recv(1024)
-            conn.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
+            request = conn.recv(1024)
+            url_path = extract_url_path(request)
+            if url_path == "/":
+                conn.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
+            else:
+                conn.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")       
+
         finally:
             conn.close()
 
