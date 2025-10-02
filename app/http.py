@@ -1,5 +1,5 @@
 from codecs import decode
-from constants import CRLF
+from .constants import CRLF
 
 
 def extract_url_path(request_target):
