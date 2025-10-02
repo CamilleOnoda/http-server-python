@@ -7,7 +7,7 @@ class TestNetworkService(unittest.TestCase):
         sock = None
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.assertTrue(True, "Connection successful.")
+            self.assertTrue(True, "Connection successful")
 
         except socket.error as e:
             self.fail(f"Connection failed: {e}")
@@ -15,7 +15,11 @@ class TestNetworkService(unittest.TestCase):
         finally:
             if sock:
                 sock.close()
-                print("Socket properly closed in finally block.")
+                print("Socket properly closed in finally block")
+
+
+    def test_HTTPRequest(self):
+        pass
 
 
 if __name__ == "__main__":
