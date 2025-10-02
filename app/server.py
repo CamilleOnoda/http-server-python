@@ -1,6 +1,6 @@
 import socket
 from .http import extract_url_path
-from constants import HOST, PORT, HTTP_CODE_200, HTTP_CODE_404
+from .constants import HOST, PORT, HTTP_CODE_200, HTTP_CODE_404
 
 
 class Server:
@@ -8,7 +8,7 @@ class Server:
         self.host = host
         self.port = port
 
-    def server_forever():
+    def server_forever(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         server_socket.bind((HOST, PORT))
