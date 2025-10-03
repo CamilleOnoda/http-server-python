@@ -17,13 +17,11 @@ class Server:
         while True:
             conn, address = server_socket.accept()
             try:
-                request = conn.recv(1024)
-                url_path = extract_url_path(request)
-                response_200 = HTTP_CODE_200.encode()
-                response_404 = HTTP_CODE_404.encode()
+                raw_request = conn.recv(1024)
+                url_path = extract_url_path(raw_request)
                 if url_path == "/":
-                    conn.sendall(response_200)
+                    conn.sendall(HTTP_CODE_200.encode())
                 else:
-                    conn.sendall(response_404)       
+                    conn.sendall(HTTP_CODE_404.encode())       
             finally:
                 conn.close()
