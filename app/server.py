@@ -1,6 +1,6 @@
 import socket
 from .http import extract_url_path, handle_request
-from .constants import HOST, PORT
+from .constants import HOST, PORT, HTTP_CODE_404
 
 
 class Server:
@@ -24,7 +24,7 @@ class Server:
                     response_body = handle_request(url_path)
                     conn.sendall(response_body)
                 else:
-                    conn.sendall(response_body)
+                    conn.sendall(HTTP_CODE_404)
 
             finally:
                 conn.close()
