@@ -21,7 +21,6 @@ def handle_request(url_path: str):
             "Content-Type: text/plain", 
             f"Content-Length: {len(string.encode('utf-8'))}"
             ]) + END_HEADERS
-#        response_body = CRLF.join(response_headers).encode("utf-8") + END_HEADERS.encode("utf-8") + body
         return response_headers.encode("utf-8") + body
     elif url_path == "/":
         body = b""
@@ -33,17 +32,4 @@ def handle_request(url_path: str):
             ]) + END_HEADERS
         )
         return response_headers.encode("utf-8") + body
-    else:
-        body = b""
-        response_headers = (
-            CRLF.join([
-                HTTP_CODE_404,                     
-                "Content-Type: text/plain",
-                "Content-Length: 0",
-            ]) + END_HEADERS
-        )
-        return response_headers.encode("utf-8") + body
     
-
-
-
