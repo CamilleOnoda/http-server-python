@@ -1,6 +1,6 @@
 import socket
-from .http import extract_url_path
-from .constants import HOST, PORT, HTTP_CODE_200, HTTP_CODE_404
+from .http import extract_url_path, handle_request
+from .constants import HOST, PORT
 
 
 class Server:
@@ -19,9 +19,12 @@ class Server:
             try:
                 raw_request = conn.recv(1024)
                 url_path = extract_url_path(raw_request)
-                if url_path == "/":
-                    conn.sendall(HTTP_CODE_200.encode())
+
+                if url_path.startswith("/"):
+                    response_body = handle_request(url_path)
+                    conn.sendall(response_body)
                 else:
-                    conn.sendall(HTTP_CODE_404.encode())       
+                    conn.sendall(response_body)
+
             finally:
                 conn.close()
