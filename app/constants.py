@@ -1,4 +1,4 @@
-HOST = "localhost"
+HOST = "127.0.0.1"
 PORT = 4221
 
 HTTP_CODE_200 = "HTTP/1.1 200 OK"
