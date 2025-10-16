@@ -33,23 +33,25 @@ def get_header(raw_request: bytes, name: str):
     return None
 
 
-def handle_request(url_path: str, header_body: str=""):
+def handle_request(url_path: str, user_agent: str=""):
     if url_path.startswith("/echo/"):
         _, _, string = url_path.partition("/echo/")
         body = string.encode("utf-8")
         head = CRLF.join([
             HTTP_CODE_200,
             "Content-Type: text/plain", 
-            f"Content-Length: {len(body)}"
+            f"Content-Length: {len(body)}",
+            "Connection: close",
             ]) + END_HEADERS
         return head.encode("utf-8") + body
     
     elif url_path == "/user-agent":
-        body = header_body.encode("utf-8")
+        body = user_agent.encode("utf-8")
         head = CRLF.join([
             HTTP_CODE_200,
             "Content-Type: text/plain",
-            f"Content-Length: {len(body)}"
+            f"Content-Length: {len(body)}",
+            "Connection: close",
         ]) + END_HEADERS
         return head.encode('utf-8') + body
 
@@ -60,6 +62,7 @@ def handle_request(url_path: str, header_body: str=""):
                 HTTP_CODE_200,                     
                 "Content-Type: text/plain",
                 "Content-Length: 0",
+                "Connection: close",
             ]) + END_HEADERS
         )
         return head.encode("utf-8") + body
@@ -71,6 +74,7 @@ def handle_request(url_path: str, header_body: str=""):
                 HTTP_CODE_404,                     
                 "Content-Type: text/plain",
                 "Content-Length: 0",
+                "Connection: close",
             ]) + END_HEADERS
         )
         return head.encode("utf-8") + body
