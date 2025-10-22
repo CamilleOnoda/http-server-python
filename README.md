@@ -1,37 +1,36 @@
-[![progress-banner](https://backend.codecrafters.io/progress/http-server/32aa00e7-c83d-4b86-b57e-00dc7bd4675d)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+🧩 Build Your Own HTTP Server (Python)
 
-This is a starting point for Python solutions to the
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
+This project is part of the Codecrafters: Build Your Own HTTP Server” challenge.
+It is written in Python 3 and built entirely from scratch using sockets, no external frameworks.
 
-[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
-protocol that powers the web. In this challenge, you'll build a HTTP/1.1 server
-that is capable of serving multiple clients.
+- Features implemented so far
 
-Along the way you'll learn about TCP servers,
-[HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
-and more.
+	- TCP server setup: handles incoming socket connections.
+	- Basic HTTP request parsing: extracts method, path, and headers
+	- Echo endpoint (/echo/<string>) – returns text sent in the path
+	- User-Agent endpoint (/user-agent) – returns client’s User-Agent header
+	- Concurrent connections – handles multiple clients at once using threads
+	- Implemented with a semaphore to limit simultaneous threads
+	- Added logging safeguards (Lock, flush=True) to keep output readable
+	- Graceful connection handling – proper socket closure and timeout management
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+- Key learnings
 
-# Passing the first stage
+	- How HTTP/1.1 requests and responses are structured
+	- Difference between concurrent and sequential handling
+	- Practical use of Python’s threading, Lock, and Semaphore
+	- Why daemon threads are convenient for testing but not for production
+	- How curl behavior can vary depending on connection headers and timing
 
-The entry point for your HTTP server implementation is in `app/main.py`. Study
-and uncomment the relevant code, and push your changes to pass the first stage:
+- Tech stack
 
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
-```
+	- Language: Python 3
+	- Modules: socket, threading
+	- Testing: manual with curl and automated Codecrafters tests
 
-Time to move on to the next stage!
+- Next steps
 
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `python (3.13)` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `app/main.py`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+	- File server endpoint (/files/<filename>) – serves files from a directory passed with --directory
+	- Implement POST file upload
+	- Add Content-Encoding (gzip) support
+	- Improve error handling and logging structure
