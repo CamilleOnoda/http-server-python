@@ -1,8 +1,4 @@
-HOST = "127.0.0.1"
-PORT = 4221
-
 HTTP_CODE_200 = "HTTP/1.1 200 OK"
 HTTP_CODE_404 = "HTTP/1.1 404 Not Found"
-
 CRLF = "\r\n"
 END_HEADERS = "\r\n\r\n"

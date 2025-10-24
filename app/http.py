@@ -1,4 +1,5 @@
 from .constants import CRLF, END_HEADERS, HTTP_CODE_200, HTTP_CODE_404
+from pathlib import Path
 
 
 def get_url(raw_request: bytes):
@@ -33,7 +34,7 @@ def get_header(raw_request: bytes, name: str):
     return None
 
 
-def handle_request(url_path: str, user_agent: str=""):
+def handle_request(url_path: str, file_root, user_agent: str="", ):
     if url_path.startswith("/echo/"):
         _, _, string = url_path.partition("/echo/")
         body = string.encode("utf-8")
@@ -45,6 +46,7 @@ def handle_request(url_path: str, user_agent: str=""):
             ]) + END_HEADERS
         return head.encode("utf-8") + body
     
+
     elif url_path == "/user-agent":
         body = user_agent.encode("utf-8")
         head = CRLF.join([
@@ -52,8 +54,44 @@ def handle_request(url_path: str, user_agent: str=""):
             "Content-Type: text/plain",
             f"Content-Length: {len(body)}",
             "Connection: close",
-        ]) + END_HEADERS
+            ]) + END_HEADERS
         return head.encode('utf-8') + body
+    
+
+    elif url_path.startswith("/files/"):
+        _,_,file = url_path.partition("/files/")
+        if not file or "/" in file or ".." in file:
+            head = HTTP_CODE_404 + END_HEADERS
+            return head.encode("utf-8")
+        else:
+            full_path = (file_root / file).resolve()
+
+            try:
+                full_path.relative_to(file_root)
+            except ValueError:
+                print(f"Cannot read '{file}' as it is outside the permitted directory.")
+                head = HTTP_CODE_404 + END_HEADERS
+                return head.encode("utf-8")
+            
+            if not full_path.is_file():
+                print(f"'{file}' is not a file or format not allowed.")
+                head = HTTP_CODE_404 + END_HEADERS
+                return head.encode("utf-8")
+            
+            try:
+                content = full_path.read_bytes()
+            except Exception as e:
+                print(f"Error reading {file}: {e}")
+                head = HTTP_CODE_404 + END_HEADERS
+                return head.encode("utf-8")
+
+            head = CRLF.join([
+                HTTP_CODE_200,
+                "Content-Type: application/octet-stream",
+                f"Content-Length: {len(content)}",
+                "Connection: close",
+                ]) + END_HEADERS
+            return head.encode('utf-8') + content
 
     elif url_path == "/":
         body = b""
@@ -67,6 +105,7 @@ def handle_request(url_path: str, user_agent: str=""):
         )
         return head.encode("utf-8") + body
     
+
     else:
         body = b""
         head = (
