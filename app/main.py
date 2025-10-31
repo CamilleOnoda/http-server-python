@@ -4,25 +4,26 @@ from pathlib import Path
 import argparse
 
 
-
 def main():
     parser = argparse.ArgumentParser(add_help=True)
-    parser.add_argument("--directory", help="Absolute path to the file directory.")
+    parser.add_argument("--directory",
+                        type=str,
+                        help="Absolute path to the file directory.")
     args = parser.parse_args()
-            
-    try:
-        if args.directory:
-            path_directory = Path(args.directory).resolve()
-        else:
-            path_directory = None
 
-    except FileNotFoundError:
-        print(f"Error: Directory '{args.directory}' does not exist.")
-        return
-    
+    if args.directory:
+        path_directory = Path(args.directory).resolve(strict=False)
+        if not path_directory.exists():
+            raise FileNotFoundError(f"Error: Directory '{path_directory}' does not exist.")
+        if not path_directory.is_dir():
+            raise NotADirectoryError(f"Error: '{path_directory}' is not a directory.")        
+    else:
+        path_directory = Path("/tmp").resolve()
+
     server_config = ServerConfig(host="127.0.0.1",
-                                        port=4221,
-                                        directory=path_directory)
+                                 port=4221,
+                                 root_dir=path_directory)
+    print(f"Serving files from: {server_config.root_dir}")
 
     Server(server_config).serve_forever()
 
