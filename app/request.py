@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from operator import contains
 from typing import Optional, Dict, Tuple
-from .constants import CRLF, CRLF_BYTES, END_HEADERS, HTTP_CODE_400
+from .constants import CRLF
 
 
 class BadRequest(Exception):
@@ -32,15 +31,15 @@ class Request:
                                 body_prefix,
                                 remote_addr: Optional[Tuple[str,int]]
                                 ) -> "Request":
-        """Classmethod that parses raw bytes into a Request instance"""
-
+        """
+        Classmethod that parses raw bytes into a Request instance
+        """
         text = header_bytes.decode("utf-8",errors="replace")
-
         try:
             start_line, header_block = text.split(CRLF,1)
         except ValueError:
             raise BadRequest("Malformed request: missing CRLF after the start-line")
-        
+
         parts = start_line.split(" ")
         if len(parts) != 3:
             raise BadRequest("Malformed request line: "
@@ -55,15 +54,17 @@ class Request:
             name, sep, value = line.partition(":")
             if not sep:
                 raise BadRequest("Malformed header line (missing ':')")
-            headers[name.strip()] = value.strip()
+            
+            headers[name.strip().lower()] = value.strip()
+        print(f"HEADERS ===> {headers}")
 
         te = headers.get("transfer-encoding")
-        if te:
-            if "chunked" in te.lower():
-                raise NotImplementedTE("Transfer-Encoding: chunked not yet supported")
+        if te and "chunked" in te.lower():
+            raise NotImplementedTE("Transfer-Encoding: chunked"
+                                    " is not yet supported")
             
         cl_raw = headers.get("content-length")
-        content_length: Optional[int] = None
+        content_length = None
         if cl_raw is not None:
             try:
                 content_length = int(cl_raw)
@@ -73,6 +74,7 @@ class Request:
                 raise BadRequest("Invalid Content-Length")
 
         connection = headers.get("connection")
+        connection = connection.lower() if connection else None
 
         return cls(method=method,
                    target=target,
@@ -88,22 +90,25 @@ class Request:
         
 
     def get_header(self,name):
-        """Case-insensitive loopup for a specific header"""
+        """
+        Case-insensitive lookup for a specific header
+        """
         return self.headers.get(name.lower())
     
     def read_body(self):
-        """Should the server be reading the body at all?\n
+        """
+        Should the server be reading the body at all?\n
         Used by 'handle_client' to decide if 
         it should call '_read_request_body()'
         """
-        return (self.content_length) > 0
+        return (self.content_length or 0) > 0
     
     def add_body(self, body: bytes):
-        """Safety check to ensure the exact number of bytes are read.\n
-        Then set the final body"""
-        if (self.content_length) != len(body):
+        """
+        Safety check to ensure the exact number of bytes are read.\n
+        Then set the final body
+        """
+        if (self.content_length or 0) != len(body):
             raise BadRequest("Body length and 'Content-Length' do not match")
         self.body = body
-
-
 
