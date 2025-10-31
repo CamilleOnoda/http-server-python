@@ -1,42 +1,26 @@
-from .constants import CRLF, END_HEADERS, HTTP_CODE_200, HTTP_CODE_404
+from .constants import CRLF, END_HEADERS, HTTP_CODE_200, HTTP_CODE_201, HTTP_CODE_404
 from pathlib import Path
+from .request import Request
 
 
-def get_url(raw_request: bytes):
-    text = raw_request.decode('utf-8', errors='replace')
-    request_line = text.split(CRLF, 1)[0]
-    url_path = request_line.split(" ", 2)
-    if len(url_path) != 3:
-        raise ValueError("Malformed request line."
-                         "Example: 'GET /index.html HTTP/1.1\r\n'")
-    return url_path[1]
+def create_write_file(full_path: Path, req: Request):
+    try:
+        with open(full_path, 'wb') as file:
+            file.write(req.body)
+            return True
+        with open(full_path, 'rb') as file_read:
+            read_data = file_read.read()
+            print(f"Read data from '{full_path}': {read_data}")
+    except OSError as e:
+        print(f"An operating system error occured: {e}")
+        return False
 
 
-def parse_headers(raw_request: bytes):
-    text = raw_request.decode("utf-8", errors="replace")
-    http_request, _, _ = text.partition(END_HEADERS)
-    lines = http_request.split(CRLF)
-    headers: dict[str,str] = {}
-    for line in lines[1:]:
-        if not line:
-            continue
-        name, sep, value = line.partition(":")
-        if sep:
-            headers[name.strip()] = value.strip()
-    return headers
+def handle_request(req: Request, file_root: Path):
+    path = req.target
 
-
-def get_header(raw_request: bytes, name: str):
-    headers = parse_headers(raw_request)
-    for key, value in headers.items():
-        if key.lower() == name.lower():
-            return value
-    return None
-
-
-def handle_request(url_path: str, file_root, user_agent: str="", ):
-    if url_path.startswith("/echo/"):
-        _, _, string = url_path.partition("/echo/")
+    if path.startswith("/echo/"):
+        _, _, string = path.partition("/echo/")
         body = string.encode("utf-8")
         head = CRLF.join([
             HTTP_CODE_200,
@@ -46,9 +30,9 @@ def handle_request(url_path: str, file_root, user_agent: str="", ):
             ]) + END_HEADERS
         return head.encode("utf-8") + body
     
-
-    elif url_path == "/user-agent":
-        body = user_agent.encode("utf-8")
+    elif path == "/user-agent":
+        ua = req.get_header("user-agent")
+        body = ua.encode("utf-8")
         head = CRLF.join([
             HTTP_CODE_200,
             "Content-Type: text/plain",
@@ -57,55 +41,55 @@ def handle_request(url_path: str, file_root, user_agent: str="", ):
             ]) + END_HEADERS
         return head.encode('utf-8') + body
     
-
-    elif url_path.startswith("/files/"):
-        _,_,file = url_path.partition("/files/")
-        if not file or "/" in file or ".." in file:
+    elif path.startswith("/files/"):
+        _, _, filename = path.partition("/files/")
+        if not filename or "/" in filename or ".." in filename:
             head = HTTP_CODE_404 + END_HEADERS
             return head.encode("utf-8")
         else:
-            full_path = (file_root / file).resolve()
-
+            full_root = file_root.resolve()
+            full_path = (full_root / filename).resolve()
             try:
-                full_path.relative_to(file_root)
+                full_path.relative_to(full_root)
             except ValueError:
-                print(f"Cannot read '{file}' as it is outside the permitted directory.")
+                print(f"Cannot read '{filename}' as it is outside the permitted directory.")
                 head = HTTP_CODE_404 + END_HEADERS
                 return head.encode("utf-8")
             
-            if not full_path.is_file():
-                print(f"'{file}' is not a file or format not allowed.")
-                head = HTTP_CODE_404 + END_HEADERS
-                return head.encode("utf-8")
-            
-            try:
-                content = full_path.read_bytes()
-            except Exception as e:
-                print(f"Error reading {file}: {e}")
-                head = HTTP_CODE_404 + END_HEADERS
-                return head.encode("utf-8")
+            if req.method == 'GET':
+                if not full_path.is_file():
+                    print(f"'{filename}' is not a file or format not allowed.")
+                    head = HTTP_CODE_404 + END_HEADERS
+                    return head.encode("utf-8")
+                try:
+                    content = full_path.read_bytes()
+                    head = CRLF.join([
+                        HTTP_CODE_200,
+                        "Content-Type: application/octet-stream",
+                        f"Content-Length: {len(content)}",
+                        "Connection: close",
+                        ]) + END_HEADERS
+                    return head.encode('utf-8') + content
+                except Exception as e:
+                    print(f"Error reading {filename}: {str(e)}")
+                    head = HTTP_CODE_404 + END_HEADERS
+                    return head.encode("utf-8")
 
-            head = CRLF.join([
-                HTTP_CODE_200,
-                "Content-Type: application/octet-stream",
-                f"Content-Length: {len(content)}",
-                "Connection: close",
-                ]) + END_HEADERS
-            return head.encode('utf-8') + content
+            if req.method == 'POST':
+                if create_write_file(full_path, req):
+                    head = HTTP_CODE_201 + END_HEADERS
+                    return head.encode('utf-8')
 
-    elif url_path == "/":
+    elif path == "/":
         body = b""
-        head = (
-            CRLF.join([
+        head =CRLF.join([
                 HTTP_CODE_200,                     
                 "Content-Type: text/plain",
                 "Content-Length: 0",
                 "Connection: close",
-            ]) + END_HEADERS
-        )
+                ]) + END_HEADERS
         return head.encode("utf-8") + body
     
-
     else:
         body = b""
         head = (
