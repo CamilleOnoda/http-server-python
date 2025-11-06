@@ -1,6 +1,6 @@
 🧩 HTTP server from scratch in Python
 
-This project is written in Python 3 and built entirely from scratch using sockets, no external frameworks.
+This project is part of the Codecrafters "Build your own HTTP server" challenge. It is written in Python 3 and built entirely from scratch using sockets, no external frameworks.
 
 ### Features implemented
 
@@ -33,17 +33,34 @@ python3 app/main.py --directory ./public
 ### What’s happening behind the scenes
 
 When you start the program, your computer opens a listening socket (like a receptionist waiting for phone calls).
-When another program (like your browser or a command such as curl) sends a request, the server reads that message, figures out what’s being asked for, and sends back a reply that follows the rules of the HTTP protocol
+That “phone line” stays open, ready to receive messages from any client that wants to talk.
+
+When another program (like your browser or a command such as curl) connects, it sends a small text message called an *HTTP request*.
+The request describes what the client wants: usually which resource to access (like */echo/hello*) and how (using methods such as *GET* or *POST*).
+
+Your server reads this raw text, understands what’s being asked for, and sends back a reply: the *HTTP response*. That response also follows strict formatting rules so the client knows how to interpret it.
 
 For example:
 ```
 curl http://localhost:4221/echo/hello
 ```
-The server reads that request and responds:
+
+1. *curl* (the client) dials your server’s “phone number” (port 4221) and says:
+```
+GET /echo/hello HTTP/1.1
+Host: localhost
+```
+This means: “Hi server, I’d like the content at /echo/hello.”
+
+2. Your server reads that message and decides what to send back.
+Since */echo/hello* means “repeat the word after /echo/,” it builds a reply:
 ```
 HTTP/1.1 200 OK
 hello
 ```
+
+3. The client receives that reply, prints the text part (hello), and closes the connection.
+
 In simple terms:
 
 - The server = your program waiting and responding.
