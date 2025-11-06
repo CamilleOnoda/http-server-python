@@ -7,10 +7,10 @@ def create_write_file(full_path: Path, req: Request):
     try:
         with open(full_path, 'wb') as file:
             file.write(req.body)
-            return True
         with open(full_path, 'rb') as file_read:
             read_data = file_read.read()
             print(f"Read data from '{full_path}': {read_data}")
+        return True
     except OSError as e:
         print(f"An operating system error occured: {e}")
         return False
