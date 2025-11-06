@@ -1,7 +1,6 @@
-🧩 Build Your Own HTTP Server (Python)
+🧩 HTTP server from scratch in Python
 
-This project is part of the Codecrafters: "Build Your Own HTTP Server" challenge.
-It is written in Python 3 and built entirely from scratch using sockets, no external frameworks.
+This project is written in Python 3 and built entirely from scratch using sockets, no external frameworks.
 
 ### Features implemented
 
