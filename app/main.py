@@ -12,13 +12,15 @@ def main():
     args = parser.parse_args()
 
     if args.directory:
-        path_directory = Path(args.directory).resolve(strict=False)
-        if not path_directory.exists():
-            raise FileNotFoundError(f"Error: Directory '{path_directory}' does not exist.")
-        if not path_directory.is_dir():
-            raise NotADirectoryError(f"Error: '{path_directory}' is not a directory.")        
+        path_directory = Path(args.directory).resolve(strict=False)    
     else:
-        path_directory = Path("/tmp").resolve()
+        path_directory = Path("/tmp/").resolve()
+
+    if not path_directory.exists():
+        print(f"Directory: '{path_directory} does not exist. Creating it...'")
+        path_directory.mkdir(parents=True, exist_ok=True)
+    elif not path_directory.is_dir():
+        raise NotADirectoryError(f"Error: '{path_directory}' is not a directory.")    
 
     server_config = ServerConfig(host="127.0.0.1",
                                  port=4221,
