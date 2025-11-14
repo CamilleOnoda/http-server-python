@@ -1,7 +1,7 @@
 import socket, threading
 from app.config import ServerConfig
 from .http import handle_request
-from .constants import (END_HEADERS_BYTES, END_HEADERS, CRLF,
+from .constants import (VERSION, END_HEADERS_BYTES, END_HEADERS, CRLF,
                         HTTP_CODE_400, HTTP_CODE_408, 
                         HTTP_CODE_413, HTTP_CODE_501)
 from .request import Request, NotImplementedTE, BadRequest
@@ -94,7 +94,8 @@ class Server:
                       lock: threading.Lock
                       ) -> None:
         with lock:
-            print(f"[{threading.current_thread().name}] Handling request",
+            print(f"[{threading.current_thread().name}]"
+                  f"Handling request [Version: {VERSION}]",
                   flush=True)
         try:
             header_bytes, body_prefix = self._recv_request_headers(conn)
@@ -136,7 +137,8 @@ class Server:
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         server_socket.bind((self.config.host, self.config.port))
         server_socket.listen(64)
-        print(f"Server listening on: {self.config.host}, {self.config.port}")
+        print(f"[Server listening on] {self.config.host}, {self.config.port}")
+        print(f"[Server version] {VERSION}")
 
         while True:
             conn, addr = server_socket.accept()
