@@ -84,8 +84,8 @@ class Server:
         ]) + END_HEADERS
         try:
             conn.sendall(head.encode("utf-8") + body)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
 
 
     def handle_client(self,

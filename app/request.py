@@ -17,9 +17,11 @@ class Request:
     target: str
     http_version: str
     headers: Dict[str, str]
+    accept_encoding: str
+    content_encoding: str
     content_length: Optional[int]
-    transfer_encoding: Optional[str]
     connection: Optional[str]
+    transfer_encoding: Optional[str]
     body_prefix: bytes = field(default_factory=bytes)
     body: Optional[bytes] = None
     remote_addr: Optional[Tuple[str,int]] = None
@@ -56,7 +58,6 @@ class Request:
                 raise BadRequest("Malformed header line (missing ':')")
             
             headers[name.strip().lower()] = value.strip()
-        print(f"HEADERS ===> {headers}")
 
         te = headers.get("transfer-encoding")
         if te and "chunked" in te.lower():
@@ -76,13 +77,27 @@ class Request:
         connection = headers.get("connection")
         connection = connection.lower() if connection else None
 
+        a_encoding = headers.get("accept-encoding")
+        if a_encoding is not None:
+            a_encoding = a_encoding.lower()
+        else:
+            a_encoding = ""
+
+        c_encoding = headers.get("content-encoding")
+        if c_encoding is not None:
+            c_encoding = c_encoding.lower()
+        else:
+            c_encoding = ""
+
         return cls(method=method,
                    target=target,
                    http_version=http_version,
                    headers=headers,
+                   accept_encoding=a_encoding,
+                   content_encoding=c_encoding,
                    content_length=content_length,
-                   transfer_encoding=te.lower() if te else None,
                    connection=connection.lower() if connection else None,
+                   transfer_encoding=te.lower() if te else None,
                    body_prefix=body_prefix,
                    body=None,
                    remote_addr=remote_addr,

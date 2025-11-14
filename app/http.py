@@ -22,13 +22,33 @@ def handle_request(req: Request, file_root: Path):
     if path.startswith("/echo/"):
         _, _, string = path.partition("/echo/")
         body = string.encode("utf-8")
-        head = CRLF.join([
-            HTTP_CODE_200,
-            "Content-Type: text/plain", 
-            f"Content-Length: {len(body)}",
-            "Connection: close",
-            ]) + END_HEADERS
-        return head.encode("utf-8") + body
+        if "accept-encoding" in req.headers:
+            comp_scheme = req.get_header("accept-encoding")
+            if comp_scheme != "gzip":
+                head = CRLF.join([
+                    HTTP_CODE_200,
+                    "Content-Type: text/plain",
+                    f"Content-Length: {len(body)}",
+                    "Connection: close",
+                    ]) + END_HEADERS
+                return head.encode("utf-8") + body
+            else:    
+                head = CRLF.join([
+                    HTTP_CODE_200,
+                    "Content-Type: text/plain",
+                    f"Content-Encoding: {comp_scheme}",
+                    f"Content-Length: {len(body)}",
+                    "Connection: close",
+                    ]) + END_HEADERS
+                return head.encode("utf-8") + body
+        else:
+            head = CRLF.join([
+                HTTP_CODE_200,
+                "Content-Type: text/plain",
+                f"Content-Length: {len(body)}",
+                "Connection: close",
+                ]) + END_HEADERS
+            return head.encode("utf-8") + body
     
     elif path == "/user-agent":
         ua = req.get_header("user-agent")
