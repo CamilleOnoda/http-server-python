@@ -1,3 +1,7 @@
+import time
+
+VERSION = time.strftime("build-%H:%M")
+
 HTTP_CODE_200 = "HTTP/1.1 200 OK"
 HTTP_CODE_201 = "HTTP/1.1 201 Created"
 HTTP_CODE_400 = "HTTP/1.1 400 Bad Request"
