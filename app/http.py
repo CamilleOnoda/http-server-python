@@ -1,6 +1,7 @@
 from .constants import CRLF, END_HEADERS, HTTP_CODE_200, HTTP_CODE_201, HTTP_CODE_404
 from pathlib import Path
 from .request import Request
+import gzip
 
 
 def create_write_file(full_path: Path, req: Request):
@@ -32,15 +33,16 @@ def handle_request(req: Request, file_root: Path):
                     "Connection: close",
                     ]) + END_HEADERS
                 return head.encode("utf-8") + body
-            else:    
+            else: 
+                compressed_body = gzip.compress(body)   
                 head = CRLF.join([
                     HTTP_CODE_200,
                     "Content-Type: text/plain",
                     f"Content-Encoding: gzip",
-                    f"Content-Length: {len(body)}",
+                    f"Content-Length: {len(compressed_body)}",
                     "Connection: close",
                     ]) + END_HEADERS
-                return head.encode("utf-8") + body
+                return head.encode("utf-8") + compressed_body
         else:
             head = CRLF.join([
                 HTTP_CODE_200,
