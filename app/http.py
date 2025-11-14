@@ -42,7 +42,7 @@ def handle_request(req: Request, file_root: Path):
                     f"Content-Length: {len(compressed_body)}",
                     "Connection: close",
                     ]) + END_HEADERS
-                return head.encode("utf-8") + compressed_body
+                return head.encode("utf-8")+compressed_body
         else:
             head = CRLF.join([
                 HTTP_CODE_200,
