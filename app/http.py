@@ -24,7 +24,7 @@ def handle_request(req: Request, file_root: Path):
         body = string.encode("utf-8")
         if "accept-encoding" in req.headers:
             comp_scheme = req.get_header("accept-encoding")
-            if comp_scheme != "gzip":
+            if "gzip" not in comp_scheme:
                 head = CRLF.join([
                     HTTP_CODE_200,
                     "Content-Type: text/plain",
@@ -36,7 +36,7 @@ def handle_request(req: Request, file_root: Path):
                 head = CRLF.join([
                     HTTP_CODE_200,
                     "Content-Type: text/plain",
-                    f"Content-Encoding: {comp_scheme}",
+                    f"Content-Encoding: gzip",
                     f"Content-Length: {len(body)}",
                     "Connection: close",
                     ]) + END_HEADERS
