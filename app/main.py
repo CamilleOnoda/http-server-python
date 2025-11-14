@@ -17,7 +17,7 @@ def main():
         path_directory = Path("/tmp/").resolve()
 
     if not path_directory.exists():
-        print(f"Directory: '{path_directory} does not exist. Creating it...'")
+        print(f"[Directory] '{path_directory} does not exist. Creating it...'")
         path_directory.mkdir(parents=True, exist_ok=True)
     elif not path_directory.is_dir():
         raise NotADirectoryError(f"Error: '{path_directory}' is not a directory.")    
@@ -25,7 +25,7 @@ def main():
     server_config = ServerConfig(host="127.0.0.1",
                                  port=4221,
                                  root_dir=path_directory)
-    print(f"Serving files from: {server_config.root_dir}")
+    print(f"[Serving files from] {server_config.root_dir}")
 
     Server(server_config).serve_forever()
 
