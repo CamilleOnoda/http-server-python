@@ -19,6 +19,10 @@ def create_write_file(full_path: Path, req: Request):
 
 def handle_request(req: Request, file_root: Path):
     path = req.target
+    conn_header = ""
+    conn_value = req.get_header("connection")
+    if conn_value == "close":
+        conn_header = "Connection: close"
 
     if path.startswith("/echo/"):
         _, _, string = path.partition("/echo/")
@@ -26,37 +30,41 @@ def handle_request(req: Request, file_root: Path):
         if "accept-encoding" in req.headers:
             comp_scheme = req.get_header("accept-encoding")
             if "gzip" not in comp_scheme:
-                head = CRLF.join([
-                    HTTP_CODE_200,
-                    "Content-Type: text/plain",
-                    f"Content-Length: {len(body)}",
-                    ]) + END_HEADERS
+                headers = [HTTP_CODE_200,
+                           "Content-Type: text/plain",
+                           f"Content-Length: {len(body)}",]
+                if conn_header:
+                    headers.append(conn_header)
+                head = CRLF.join(headers) + END_HEADERS
                 return head.encode("utf-8") + body
             else: 
                 compressed_body = gzip.compress(body)   
-                head = CRLF.join([
-                    HTTP_CODE_200,
-                    "Content-Type: text/plain",
-                    f"Content-Encoding: gzip",
-                    f"Content-Length: {len(compressed_body)}",
-                    ]) + END_HEADERS
+                headers = [HTTP_CODE_200,
+                        "Content-Type: text/plain",
+                        f"Content-Encoding: gzip",
+                        f"Content-Length: {len(compressed_body)}",]
+                if conn_header:
+                    headers.append(conn_header)
+                head = CRLF.join(headers) + END_HEADERS
                 return head.encode("utf-8")+compressed_body
         else:
-            head = CRLF.join([
-                HTTP_CODE_200,
-                "Content-Type: text/plain",
-                f"Content-Length: {len(body)}",
-                ]) + END_HEADERS
+            headers = [HTTP_CODE_200,
+                    "Content-Type: text/plain",
+                    f"Content-Length: {len(body)}",]
+            if conn_header:
+                headers.append(conn_header)
+            head = CRLF.join(headers) + END_HEADERS
             return head.encode("utf-8") + body
     
     elif path == "/user-agent":
         ua = req.get_header("user-agent")
         body = ua.encode("utf-8")
-        head = CRLF.join([
-            HTTP_CODE_200,
-            "Content-Type: text/plain",
-            f"Content-Length: {len(body)}",
-            ]) + END_HEADERS
+        headers =[HTTP_CODE_200,
+               "Content-Type: text/plain",
+               f"Content-Length: {len(body)}",]
+        if conn_header:
+            headers.append(conn_header)
+        head = CRLF.join(headers) + END_HEADERS
         return head.encode('utf-8') + body
     
     elif path.startswith("/files/"):
@@ -82,12 +90,14 @@ def handle_request(req: Request, file_root: Path):
                     return head.encode("utf-8")
                 try:
                     content = full_path.read_bytes()
-                    head = CRLF.join([
-                        HTTP_CODE_200,
-                        "Content-Type: application/octet-stream",
-                        f"Content-Length: {len(content)}", 
-                        ]) + END_HEADERS
+                    headers = [HTTP_CODE_200,
+                            "Content-Type: application/octet-stream",
+                            f"Content-Length: {len(content)}",]
+                    if conn_header:
+                        headers.append(conn_header)
+                    head = CRLF.join(headers) + END_HEADERS
                     return head.encode('utf-8') + content
+                
                 except Exception as e:
                     print(f"Error reading {filename}: {str(e)}")
                     head = HTTP_CODE_404 + END_HEADERS
@@ -100,11 +110,12 @@ def handle_request(req: Request, file_root: Path):
 
     elif path == "/":
         body = b""
-        head =CRLF.join([
-                HTTP_CODE_200,                     
+        headers = [HTTP_CODE_200,                     
                 "Content-Type: text/plain",
-                "Content-Length: 0",
-                ]) + END_HEADERS
+                "Content-Length: 0",]
+        if conn_header:
+            headers.append(conn_header)
+        head = CRLF.join(headers) + END_HEADERS
         return head.encode("utf-8") + body
     
     else:
