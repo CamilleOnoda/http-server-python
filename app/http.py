@@ -30,7 +30,6 @@ def handle_request(req: Request, file_root: Path):
                     HTTP_CODE_200,
                     "Content-Type: text/plain",
                     f"Content-Length: {len(body)}",
-                    "Connection: close",
                     ]) + END_HEADERS
                 return head.encode("utf-8") + body
             else: 
@@ -40,7 +39,6 @@ def handle_request(req: Request, file_root: Path):
                     "Content-Type: text/plain",
                     f"Content-Encoding: gzip",
                     f"Content-Length: {len(compressed_body)}",
-                    "Connection: close",
                     ]) + END_HEADERS
                 return head.encode("utf-8")+compressed_body
         else:
@@ -48,7 +46,6 @@ def handle_request(req: Request, file_root: Path):
                 HTTP_CODE_200,
                 "Content-Type: text/plain",
                 f"Content-Length: {len(body)}",
-                "Connection: close",
                 ]) + END_HEADERS
             return head.encode("utf-8") + body
     
@@ -59,7 +56,6 @@ def handle_request(req: Request, file_root: Path):
             HTTP_CODE_200,
             "Content-Type: text/plain",
             f"Content-Length: {len(body)}",
-            "Connection: close",
             ]) + END_HEADERS
         return head.encode('utf-8') + body
     
@@ -74,7 +70,8 @@ def handle_request(req: Request, file_root: Path):
             try:
                 full_path.relative_to(full_root)
             except ValueError:
-                print(f"Cannot read '{filename}' as it is outside the permitted directory.")
+                print(f"Cannot read '{filename}' "
+                      "as it is outside the permitted directory.")
                 head = HTTP_CODE_404 + END_HEADERS
                 return head.encode("utf-8")
             
@@ -88,8 +85,7 @@ def handle_request(req: Request, file_root: Path):
                     head = CRLF.join([
                         HTTP_CODE_200,
                         "Content-Type: application/octet-stream",
-                        f"Content-Length: {len(content)}",
-                        "Connection: close",
+                        f"Content-Length: {len(content)}", 
                         ]) + END_HEADERS
                     return head.encode('utf-8') + content
                 except Exception as e:
@@ -108,7 +104,6 @@ def handle_request(req: Request, file_root: Path):
                 HTTP_CODE_200,                     
                 "Content-Type: text/plain",
                 "Content-Length: 0",
-                "Connection: close",
                 ]) + END_HEADERS
         return head.encode("utf-8") + body
     
@@ -119,11 +114,7 @@ def handle_request(req: Request, file_root: Path):
                 HTTP_CODE_404,                     
                 "Content-Type: text/plain",
                 "Content-Length: 0",
-                "Connection: close",
             ]) + END_HEADERS
         )
         return head.encode("utf-8") + body
     
-
-
-
