@@ -26,7 +26,7 @@ class Server:
             while True:
                 chunk = conn.recv(4096)
                 if not chunk:
-                    break
+                    return None
                 buffer += chunk
                 if end in buffer:
                     break
@@ -42,6 +42,7 @@ class Server:
             return header_bytes, body_prefix
         except socket.timeout:
             self._send_error(conn, HTTP_CODE_408, "Request Timeout")
+            return None
     
 
     def _read_request_body(self, conn: socket.socket, req: Request) -> None:
@@ -97,25 +98,37 @@ class Server:
             print(f"[{threading.current_thread().name}]"
                   f"Handling request [Version: {VERSION}]",
                   flush=True)
+        
         try:
-            header_bytes, body_prefix = self._recv_request_headers(conn)
-            req = Request.create_request_instance(header_bytes,
-                                                  body_prefix, 
-                                                  remote_addr=conn.getpeername())
-            if (req.content_length or 0) > self.config.max_body_bytes:
-                raise PayloadTooLarge()
-            if req.read_body():
-                self._read_request_body(conn, req)
-            else:
-                req.add_body(b"")
-            
-            response = handle_request(req, self.config.root_dir)
-            conn.sendall(response)
+            while True:
+                header_data = self._recv_request_headers(conn)
+                if header_data == None:
+                    break
+                header_bytes, body_prefix = header_data
+
+                req = Request.create_request_instance(header_bytes,
+                                                    body_prefix, 
+                                                    remote_addr=conn.getpeername())
+                if (req.content_length or 0) > self.config.max_body_bytes:
+                    raise PayloadTooLarge()
+                if req.read_body():
+                    self._read_request_body(conn, req)
+                else:
+                    req.add_body(b"")
+                
+                response = handle_request(req, self.config.root_dir)
+                conn.sendall(response)
+
+                conn_header = req.get_header("connection")
+                if "close" in conn_header or "":
+                    conn.close()
+                    sem.release()
+                    break
 
         except NotImplementedTE:
             self._send_error(conn, HTTP_CODE_501, 
-                             "Transfer-Encoding: chunked"
-                             " is not supported")
+                            "Transfer-Encoding: chunked"
+                            " is not supported")
         except PayloadTooLarge:
             self._send_error(conn, HTTP_CODE_413, "Payload Too Large")
         except IncompleteBody:
