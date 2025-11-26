@@ -44,9 +44,9 @@ class Request:
 
         parts = start_line.split(" ")
         if len(parts) != 3:
-            raise BadRequest("Malformed request line: "
-                             "single space, request-target, another single space,"
-                             "protocol version, and ends with CRLF")
+            raise BadRequest("A request line must follow: "
+                             "<method>SPACE<request-target>SPACE<HTTP-version>CRLF")
+        
         method, target, http_version = parts[0], parts[1], parts[2]
 
         headers: dict[str,str] = {}
@@ -108,7 +108,7 @@ class Request:
         """
         Case-insensitive lookup for a specific header
         """
-        return self.headers.get(name.lower())
+        return self.headers.get(name.lower()) or ""
     
     def read_body(self):
         """
