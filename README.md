@@ -33,6 +33,9 @@ python3 app/main.py --directory ./public
 
 ### What’s happening behind the scenes
 
+To make the flow easier to visualize, here is the end-to-end path a request follows inside the server, each stage adding just enough structure to turn a byte stream into a valid HTTP response.
+![Image ilustrating the end-to-end path a request follows inside the server](pipeline-http-server.png)
+
 When you start the program, your computer opens a **listening socket** (like a receptionist waiting for phone calls).
 That “phone line” stays open, ready to receive messages from any client that wants to talk.
 
