@@ -1,8 +1,14 @@
-🧩 HTTP server from scratch in Python
 
-This project is part of the Codecrafters "Build your own HTTP server" challenge. It is written in Python 3 and built entirely from scratch using sockets, no external frameworks.
+# 🧩 HTTP server from scratch in Python
 
-### Features implemented
+![Python 3.x](https://img.shields.io/badge/python-3.x-blue)
+
+Build a fully functional HTTP/1.1 server in Python, from the ground up—no frameworks, just sockets. This project is part of the Codecrafters "Build your own HTTP server" challenge.
+
+---
+
+
+## Features implemented
 
 - **TCP server setup**: accepts and manages incoming socket connections.
 - Basic HTTP **request parsing**: extracts method, path, and headers.
@@ -19,19 +25,24 @@ This project is part of the Codecrafters "Build your own HTTP server" challenge.
 - **Error responses**: returns proper HTTP codes (400, 408, 413, 501) for malformed, incomplete, or oversized requests.
 
 
-### Installation
-Make sure you have **Python 3x** installed.
 
-```
+## Quick start
+
+**Requirements:** Python 3.x
+
+```sh
 # Clone the repo
 git clone https://github.com/CamilleOnoda/http-server-python
 cd http-server-python
 
-# Run the server
+# Run the server (serves files from ./public)
 python3 app/main.py --directory ./public
 ```
 
-### What’s happening behind the scenes
+---
+
+
+## How it works (Behind the Scenes)
 
 To make the flow easier to visualize, here is the end-to-end path a request follows inside the server, each stage adding just enough structure to turn a byte stream into a valid HTTP response.
 ![Image ilustrating the end-to-end path a request follows inside the server](pipeline-http-server.png)
@@ -71,18 +82,39 @@ In simple terms:
 - The client = your browser or command line sending messages.
 - HTTP = the “language” both sides speak to exchange text and files.
 
-### Project structure
+
+## Project structure
 ```
 app/
- ├── server.py    # Main TCP server loop and connection handling
- ├── request.py   # HTTP request parsing (method, path, headers, body)
- ├── http.py      # Builds and sends HTTP responses
- ├── config.py    # Server configuration (timeouts, directories, etc.)
- ├── constants.py # Shared constants (CRLF, status codes, etc.)
- ├── main.py      # Entrypoint to the Server and config flow
+ ├── server.py      # Main TCP server loop and connection handling
+ ├── request.py     # HTTP request parsing (method, path, headers, body)
+ ├── http.py        # Builds and sends HTTP responses
+ ├── config.py      # Server configuration (timeouts, directories, etc.)
+ ├── constants.py   # Shared constants (CRLF, status codes, etc.)
+ ├── main.py        # Entrypoint to the Server and config flow
 ```
 
-### Key learnings
+---
+
+## How to test
+
+**Automated tests:**
+```sh
+./test.sh
+# or manually:
+python3 -m unittest discover -s tests -p "test*.py"
+```
+
+**Manual testing with curl:**
+```sh
+curl http://localhost:4221/echo/hello
+curl -H "User-Agent: test-agent" http://localhost:4221/user-agent
+curl -X POST --data 'mydata' http://localhost:4221/files/test.txt
+```
+
+---
+
+## Key learnings
 - The full anatomy of **HTTP/1.1 requests and responses**.
 - How to structure a **Request class** to separate parsing logic from I/O.
 - Why **header normalization** (case-insensitive lookup) prevents subtle bugs.
@@ -91,12 +123,21 @@ app/
 - Practical use of **Lock, Semaphore, and socket timeouts** for stability.
 - Why **daemon threads** are convenient for tests but risky in production.
 
-### Tech stack
+---
+
+## Tech stack
 - Language: Python 3
 - Core modules: socket, threading, pathlib, dataclasses, gzip
 - Testing: manual with curl, unittest and automated Codecrafters tests
 
-### Next steps
+---
+
+## Next steps
 - Implement Transfer-Encoding: chunked for streamed bodies.
 - Add persistent connections (HTTP/1.1 Keep-Alive).
 - Improve structured logging and error output.
+---
+
+## Contributing
+
+Pull requests and suggestions are welcome! For major changes, please open an issue first to discuss what you would like to change.
