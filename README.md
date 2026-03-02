@@ -42,7 +42,7 @@ python3 app/main.py --directory ./public
 ---
 
 
-## How it works (Behind the Scenes)
+## How it works (behind the scenes)
 
 To make the flow easier to visualize, here is the end-to-end path a request follows inside the server, each stage adding just enough structure to turn a byte stream into a valid HTTP response.
 ![Image ilustrating the end-to-end path a request follows inside the server](pipeline-http-server.png)
